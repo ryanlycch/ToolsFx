@@ -10,12 +10,15 @@ class CompressController : Controller() {
         alg: Compression = Compression.GZIP,
         inputEncode: String = "raw",
         outputEncode: String = "base64",
-        isSingleLine: Boolean = false,
+        singleLine: Boolean = false,
     ): String =
         catch({ "encrypt error: $it" }) {
             println("encrypt  $alg")
-            if (isSingleLine) raw.lineAction2String { compress(it, alg, inputEncode, outputEncode) }
-            else compress(raw, alg, inputEncode, outputEncode)
+            if (singleLine) {
+                raw.lineAction2String { compress(it, alg, inputEncode, outputEncode) }
+            } else {
+                compress(raw, alg, inputEncode, outputEncode)
+            }
         }
 
     private fun compress(
@@ -23,20 +26,27 @@ class CompressController : Controller() {
         alg: Compression = Compression.GZIP,
         inputEncode: String = "raw",
         outputEncode: String = "base64",
-    ): String = alg.compress(raw.decodeToByteArray(inputEncode)).encodeTo(outputEncode)
+    ): String =
+        if (alg == Compression.LZString) {
+            Compression.LZString.compress(raw, inputEncode, outputEncode)
+        } else {
+            alg.compress(raw.decodeToByteArray(inputEncode)).encodeTo(outputEncode)
+        }
 
     fun decompress(
         raw: String,
         alg: Compression = Compression.GZIP,
         inputEncode: String = "raw",
         outputEncode: String = "base64",
-        isSingleLine: Boolean = false,
+        singleLine: Boolean = false,
     ): String =
         catch({ "decrypt error: $it" }) {
             println("decrypt  $alg")
-            if (isSingleLine)
+            if (singleLine) {
                 raw.lineAction2String { decompress(it, alg, inputEncode, outputEncode) }
-            else decompress(raw, alg, inputEncode, outputEncode)
+            } else {
+                decompress(raw, alg, inputEncode, outputEncode)
+            }
         }
 
     private fun decompress(
@@ -44,5 +54,10 @@ class CompressController : Controller() {
         alg: Compression = Compression.GZIP,
         inputEncode: String = "raw",
         outputEncode: String = "base64",
-    ) = alg.decompress(raw.decodeToByteArray(inputEncode)).encodeTo(outputEncode)
+    ) =
+        if (alg == Compression.LZString) {
+            Compression.LZString.decompress(raw, inputEncode, outputEncode)
+        } else {
+            alg.decompress(raw.decodeToByteArray(inputEncode)).encodeTo(outputEncode)
+        }
 }

@@ -34,32 +34,31 @@ class BCryptPasswordEncoder
 constructor(
     var version: BCryptVersion = BCryptVersion.`$2A`,
     var strength: Int = -1,
-    private var random: SecureRandom? = null
+    private var random: SecureRandom? = null,
 ) : PasswordEncoder {
-    companion object {
-        private val REG_BCRYPT = "\\$2([ayb])?\\$(\\d\\d)\\$[./0-9A-Za-z]{53}".toRegex()
-    }
 
     init {
         require(
             !(strength != -1 &&
                 (strength < BCrypt.MIN_LOG_ROUNDS || strength > BCrypt.MAX_LOG_ROUNDS))
-        ) { "Bad strength" }
+        ) {
+            "Bad strength"
+        }
         this.strength = if (strength == -1) 10 else strength
     }
 
-    override fun encode(rawPassword: CharSequence): String {
-        return hashpw(rawPassword.toString(), salt)
+    private val salt: String
+        get() = genSalt(version.version, strength, random ?: SecureRandom())
+
+    override fun encode(password: CharSequence): String {
+        return hashpw(password.toString(), salt)
     }
 
     fun encode(rawPassword: CharSequence, salt: ByteArray): String {
         return hashpw(rawPassword.toString(), genSalt(salt, version.version, strength))
     }
 
-    private val salt: String
-        get() = genSalt(version.version, strength, random ?: SecureRandom())
-
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
         if (encodedPassword.isEmpty()) {
             println("Empty encoded password")
             return false
@@ -69,7 +68,7 @@ constructor(
             println("Encoded password does not look like BCrypt")
             return false
         }
-        return checkPw(rawPassword.toString(), encodedPassword)
+        return checkPw(password.toString(), encodedPassword)
     }
 
     override fun upgradeEncoding(encodedPassword: String): Boolean {
@@ -91,6 +90,10 @@ constructor(
     enum class BCryptVersion(val version: String) {
         `$2A`("$2a"),
         `$2Y`("$2y"),
-        `$2B`("$2b")
+        `$2B`("$2b"),
+    }
+
+    companion object {
+        private val REG_BCRYPT = "\\$2([ayb])?\\$(\\d\\d)\\$[./0-9A-Za-z]{53}".toRegex()
     }
 }

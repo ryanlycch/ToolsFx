@@ -7,6 +7,7 @@ import java.security.MessageDigest
 import me.leon.ext.crypto.passwordHashingTypes
 import me.leon.ext.toFile
 import me.leon.ext.toHex
+import me.leon.hash.CRC_MAPPING
 
 object Digests {
 
@@ -37,6 +38,7 @@ object Digests {
 val ALGOS_HASH =
     linkedMapOf(
         "MD5" to listOf("128"),
+        "MD5_MIDDLE" to listOf("128"),
         "MD4" to listOf("128"),
         "MD2" to listOf("128"),
         "SM3" to listOf("256"),
@@ -64,7 +66,7 @@ val ALGOS_HASH =
                 "512-512",
                 "1024-384",
                 "1024-512",
-                "1024-1024"
+                "1024-1024",
             ),
         "GOST3411" to listOf("256"),
         "GOST3411-2012" to listOf("256", "512"),
@@ -72,8 +74,9 @@ val ALGOS_HASH =
         "Blake3-256" to listOf("256"),
         "TupleHash" to listOf("128", "256"),
         "ParallelHash" to listOf("128", "256"),
-        "CRC" to listOf("32", "64"),
+        "CRC" to CRC_MAPPING.keys.toList(),
         "Adler32" to listOf("32"),
+        "Windows" to listOf("LM", "NTLM"),
         "PasswordHashing" to passwordHashingTypes,
     )
 

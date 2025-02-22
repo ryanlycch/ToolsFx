@@ -1,31 +1,30 @@
 group = "me.leon.toolsfx"
-version = "1.2.0"
+version = "1.2.2"
 
 plugins {
     `java-library`
 }
 
 javafx {
-    //latest version https://mvnrepository.com/artifact/org.openjfx/javafx-controls
-    version = rootProject.extra["jfx_version"] as String
+    // latest version https://mvnrepository.com/artifact/org.openjfx/javafx-controls
+    version = libs.versions.jfxVer.get()
     modules = listOf(
         "javafx.controls",
         "javafx.swing",
         "javafx.web",
-//            if you use javafx.fxml,then uncomment it
-//            'javafx.fxml'
+        // if you use javafx.fxml,then uncomment it
+        // "javafx.fxml"
     )
 }
 
 dependencies {
     implementation(project(":plugin-lib"))
     implementation(project(":app"))
-    //compress dependencies
-    implementation("org.apache.commons:commons-compress:1.21")
-    implementation("com.github.luben:zstd-jni:1.5.2-1")
-    implementation("org.objectweb.asm:com.springsource.org.objectweb.asm:3.2.0")
-    implementation("org.tukaani:xz:1.9")
+    // compress dependencies
+    implementation(libs.commons.compress)
+    implementation(libs.zstd)
+    implementation(libs.asm)
+    implementation("org.tukaani:xz:1.10")
     implementation("org.brotli:dec:0.1.2")
-    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:${rootProject.extra["kotlin_version"]}")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${rootProject.extra["kotlin_version"]}")
+    testImplementation(libs.kotlin.test)
 }

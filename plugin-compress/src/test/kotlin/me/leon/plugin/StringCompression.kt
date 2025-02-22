@@ -5,6 +5,7 @@ import me.leon.encode.base.base64
 import me.leon.encode.base.base64Decode
 import me.leon.ext.readBytesFromNet
 import me.leon.toolsfx.plugin.compress.Compression
+import me.leon.toolsfx.plugin.compress.LzString
 import org.junit.Test
 
 class StringCompression {
@@ -117,12 +118,22 @@ class StringCompression {
 
     @Test
     fun lzString() {
-        val compressed =
-            Compression.LZString.compress(data.toByteArray()).base64().also { println(it) }
+        val compressed = Compression.LZString.compress(data, "raw", "base64").also { println(it) }
         val decompressed =
-            Compression.LZString.decompress(compressed.base64Decode()).decodeToString().also {
-                println(it)
-            }
+            Compression.LZString.decompress(compressed, "base64", "raw").also { println(it) }
         assertEquals(data, decompressed)
+
+        val bytes = "IIEwbghgdgxgpiABASyiOUAuiDmBXZdAZ0QBtU5EALZHK8uzVHRGaRAI0owg9IUQAzAPYAnIA==="
+
+        assertEquals(
+            "Advanced indent guides line highlighting can be enabled for",
+            Compression.LZString.decompress(bytes, "base64", "raw"),
+        )
+        assertEquals(
+            "nasller",
+            Compression.LZString.decompress("HYQwzgNhCmBOQ===", "base64", "raw"),
+        )
+
+        println(LzString.compressToBase64("ba"))
     }
 }

@@ -7,10 +7,10 @@ import me.leon.ext.stripAllSpace
 fun String.nihilist(
     keyword: String,
     encodeMap: String = DEFAULT_POLYBIUS_ENCODE_MAP,
-    replacePair: Pair<String, String> = "J" to "I"
+    replacePair: Pair<String, String> = "J" to "I",
 ): String {
     val maps = TABLE_A_Z_WO_J.toMutableList()
-    keyword.stripAllSpace().uppercase().toList().distinct().also {
+    keyword.stripAllSpace().uppercase().asIterable().distinct().also {
         maps.removeAll(it.toSet())
         maps.addAll(0, it)
     }
@@ -19,10 +19,10 @@ fun String.nihilist(
 
 fun String.nihilistDecrypt(
     keyword: String,
-    encodeMap: String = DEFAULT_POLYBIUS_ENCODE_MAP
+    encodeMap: String = DEFAULT_POLYBIUS_ENCODE_MAP,
 ): String {
     val maps = TABLE_A_Z_WO_J.toMutableList()
-    keyword.stripAllSpace().uppercase().toList().distinct().also {
+    keyword.stripAllSpace().uppercase().asIterable().distinct().also {
         maps.removeAll(it.toSet())
         maps.addAll(0, it)
     }
