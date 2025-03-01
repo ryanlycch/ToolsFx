@@ -26,28 +26,23 @@ import me.leon.hash.keygen.StringKeyGenerator
  * Encodes passwords using the passed in MessageDigest.
  *
  * The general format of the password is:
- *
  * <pre> s = salt == null ? "" : "{" + salt + "}" s + digest(password + s) </pre> *
  *
  * Such that "salt" is the salt, digest is the digest method, and password is the actual password.
  * For example when using MD5, a password of "password", and a salt of "thisissalt":
- *
  * <pre> String s = salt == null ? "" : "{" + salt + "}"; s + md5(password + s) "{thisissalt}" +
  * md5(password + "{thisissalt}") "{thisissalt}2a4e7104c2780098f50ed5a84bb2323d" </pre> *
  *
  * If the salt does not exist, then omit "{salt}" like this:
- *
  * <pre> digest(password) </pre> *
  *
  * If the salt is an empty String, then only use "{}" like this:
- *
  * <pre> "{}" + digest(password + "{}") </pre> *
  *
  * The format is intended to work with the DigestPasswordEncoder that was found in the Spring
  * Security core module. However, the passwords will need to be migrated to include any salt with
  * the password since this API provides Salt internally vs making it the responsibility of the user.
  * To migrate passwords from the SaltSource use the following:
- *
  * <pre> String salt = saltSource.getSalt(user); String s = salt == null ? null : "{" + salt + "}";
  * String migratedPassword = s + user.getPassword(); </pre> *
  *
@@ -66,13 +61,13 @@ class MessageDigestPasswordEncoder(algorithm: String) : PasswordEncoder {
      * Encodes the rawPass using a MessageDigest. If a salt is specified it will be merged with the
      * password before encoding.
      *
-     * @param rawPassword The plain text password
+     * @param password The plain text password
      * @return Hex string of password digest or base64 encoded string if encodeHashAsBase64 is
-     * enabled.
+     *   enabled.
      */
-    override fun encode(rawPassword: CharSequence): String {
+    override fun encode(password: CharSequence): String {
         val salt = PREFIX + saltGenerator.generateKey() + SUFFIX
-        return digest(salt, rawPassword)
+        return digest(salt, password)
     }
 
     fun digest(salt: String, rawPassword: CharSequence): String {
@@ -89,20 +84,22 @@ class MessageDigestPasswordEncoder(algorithm: String) : PasswordEncoder {
     private fun encode(digest: ByteArray): String {
         return if (encodeHashAsBase64) {
             digest.base64()
-        } else digest.toHex()
+        } else {
+            digest.toHex()
+        }
     }
 
     /**
      * Takes a previously encoded password and compares it with a rawpassword after mixing in the
      * salt and encoding that value
      *
-     * @param rawPassword plain text password
+     * @param password plain text password
      * @param encodedPassword previously encoded password
      * @return true or false
      */
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
         val salt = extractSalt(encodedPassword)
-        return encodedPassword == digest(salt, rawPassword)
+        return encodedPassword == digest(salt, password)
     }
 
     /**
@@ -111,7 +108,7 @@ class MessageDigestPasswordEncoder(algorithm: String) : PasswordEncoder {
      * called repeatedly on the result for the additional number of iterations.
      *
      * @param iterations the number of iterations which will be executed on the hashed password/salt
-     * value. Defaults to 1.
+     *   value. Defaults to 1.
      */
     fun setIterations(iterations: Int) {
         digester.setIterations(iterations)
@@ -125,7 +122,9 @@ class MessageDigestPasswordEncoder(algorithm: String) : PasswordEncoder {
         val end = prefixEncodedPassword.indexOf(SUFFIX, start)
         return if (end < 0) {
             ""
-        } else prefixEncodedPassword.substring(start, end + 1)
+        } else {
+            prefixEncodedPassword.substring(start, end + 1)
+        }
     }
 
     companion object {

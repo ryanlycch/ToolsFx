@@ -42,15 +42,15 @@ constructor(
     var hashLength: Int = DEFAULT_HASH_LENGTH,
     var parallelism: Int = DEFAULT_PARALLELISM,
     var memory: Int = DEFAULT_MEMORY,
-    var iterations: Int = DEFAULT_ITERATIONS
+    var iterations: Int = DEFAULT_ITERATIONS,
 ) : PasswordEncoder {
     private val saltGenerator: BytesKeyGenerator = secureRandom(saltLength)
 
     var type = Argon2Parameters.ARGON2_id
     var version = Argon2Parameters.ARGON2_VERSION_13
 
-    override fun encode(rawPassword: CharSequence): String {
-        return encode(rawPassword, saltGenerator.generateKey())
+    override fun encode(password: CharSequence): String {
+        return encode(password, saltGenerator.generateKey())
     }
 
     fun encode(rawPassword: CharSequence, salt: ByteArray): String {
@@ -69,7 +69,7 @@ constructor(
         return Argon2EncodingUtils.encode(hash, params)
     }
 
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
         val decoded: Argon2Hash =
             try {
                 Argon2EncodingUtils.decode(encodedPassword)
@@ -79,7 +79,7 @@ constructor(
         val hashBytes = ByteArray(decoded.hash.size)
         val generator = Argon2BytesGenerator()
         generator.init(decoded.parameters)
-        generator.generateBytes(rawPassword.toString().toCharArray(), hashBytes)
+        generator.generateBytes(password.toString().toCharArray(), hashBytes)
         return constantTimeArrayEquals(decoded.hash, hashBytes)
     }
 
@@ -98,6 +98,7 @@ constructor(
         private const val DEFAULT_PARALLELISM = 1
         private const val DEFAULT_MEMORY = 1 shl 12
         private const val DEFAULT_ITERATIONS = 3
+
         private fun constantTimeArrayEquals(expected: ByteArray, actual: ByteArray): Boolean {
             if (expected.size != actual.size) {
                 return false

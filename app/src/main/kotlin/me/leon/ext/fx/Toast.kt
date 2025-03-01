@@ -14,12 +14,13 @@ class Toast private constructor() {
     companion object {
         var size: Double = 15.0
         var opacity: Double = 5.0
+
         fun makeText(
             stage: Stage,
             message: String,
             displayTime: Int = 3000,
             fadeInDelay: Int = 500,
-            fadeOutDelay: Int = 500
+            fadeOutDelay: Int = 500,
         ) {
             val toastStage = Stage()
             toastStage.initOwner(stage)
@@ -44,7 +45,7 @@ class Toast private constructor() {
             val fadeInKey1 =
                 KeyFrame(
                     Duration.millis(fadeInDelay.toDouble()),
-                    KeyValue(toastStage.scene.root.opacityProperty(), 1)
+                    KeyValue(toastStage.scene.root.opacityProperty(), 1),
                 )
             fadeInTimeline.keyFrames.add(fadeInKey1)
             fadeInTimeline.setOnFinished {
@@ -59,7 +60,7 @@ class Toast private constructor() {
                         val fadeOutKey1 =
                             KeyFrame(
                                 Duration.millis(fadeOutDelay.toDouble()),
-                                KeyValue(toastStage.scene.root.opacityProperty(), 0)
+                                KeyValue(toastStage.scene.root.opacityProperty(), 0),
                             )
                         fadeOutTimeline.keyFrames.add(fadeOutKey1)
                         fadeOutTimeline.setOnFinished { toastStage.close() }

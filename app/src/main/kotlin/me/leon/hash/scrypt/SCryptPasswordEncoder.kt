@@ -30,18 +30,16 @@ import org.bouncycastle.crypto.generators.SCrypt
  * supply a cpu cost parameter, a memory cost parameter and a parallelization parameter.
  *
  * A few
- * [
- * warnings](http://bouncy-castle.1462172.n4.nabble.com/Java-Bouncy-Castle-scrypt-implementation-td4656832.html)
+ * [ warnings](http://bouncy-castle.1462172.n4.nabble.com/Java-Bouncy-Castle-scrypt-implementation-td4656832.html)
  * :
- *
  * * The current implementation uses Bouncy castle which does not exploit parallelism/optimizations
- * that password crackers will, so there is an unnecessary asymmetry between attacker and defender.
+ *   that password crackers will, so there is an unnecessary asymmetry between attacker and
+ *   defender.
  * * Scrypt is based on Salsa20 which performs poorly in Java (on par with AES) but performs awesome
- * (~4-5x faster) on SIMD capable platforms
- * * While there are some that would disagree, consider reading -
- * [Why I Don't
- * Recommend Scrypt](https://blog.ircmaxell.com/2014/03/why-i-dont-recommend-scrypt.html)
- * (for password storage)
+ *   (~4-5x faster) on SIMD capable platforms
+ * * While there are some that would disagree, consider
+ *   reading - [Why I Don't Recommend Scrypt](https://blog.ircmaxell.com/2014/03/why-i-dont-recommend-scrypt.html)
+ *   (for password storage)
  *
  * @author Shazin Sadakath
  * @author Rob Winch
@@ -49,17 +47,17 @@ import org.bouncycastle.crypto.generators.SCrypt
 class SCryptPasswordEncoder
 @JvmOverloads
 constructor(
-    var cpuCost: Int = 16384,
+    var cpuCost: Int = 16_384,
     var memoryCost: Int = 8,
     var parallelization: Int = 1,
     var keyLength: Int = 32,
-    var saltLength: Int = 64
+    var saltLength: Int = 64,
 ) : PasswordEncoder {
     private val saltGenerator: BytesKeyGenerator
 
     init {
         require(cpuCost > 1) { "Cpu cost parameter must be > 1." }
-        require(!(memoryCost == 1 && cpuCost > 65536)) {
+        require(!(memoryCost == 1 && cpuCost > 65_536)) {
             "Cpu cost parameter must be > 1 and < 65536."
         }
         require(memoryCost >= 1) { "Memory cost must be >= 1." }
@@ -73,16 +71,16 @@ constructor(
         saltGenerator = secureRandom(saltLength)
     }
 
-    override fun encode(rawPassword: CharSequence): String {
-        return digest(rawPassword, saltGenerator.generateKey())
+    override fun encode(password: CharSequence): String {
+        return digest(password, saltGenerator.generateKey())
     }
 
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
         if (encodedPassword.length < keyLength) {
             println("Empty encoded password")
             return false
         }
-        return decodeAndCheckMatches(rawPassword, encodedPassword)
+        return decodeAndCheckMatches(password, encodedPassword)
     }
 
     override fun upgradeEncoding(encodedPassword: String): Boolean {
@@ -118,7 +116,7 @@ constructor(
                 cpuCost,
                 memoryCost,
                 parallelization,
-                keyLength
+                keyLength,
             )
         return MessageDigest.isEqual(derived, generated)
     }
@@ -131,7 +129,7 @@ constructor(
                 cpuCost,
                 memoryCost,
                 parallelization,
-                keyLength
+                keyLength,
             )
         val params =
             ((ln(cpuCost.toDouble()) / ln(2.0)).toInt() shl

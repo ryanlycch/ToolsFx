@@ -215,7 +215,7 @@ class BCrypt {
         salt: ByteArray,
         logRounds: Int,
         signExtBug: Boolean,
-        safety: Int
+        safety: Int,
     ): ByteArray {
         var j: Int
         val cdata = bf_crypt_ciphertext.clone()
@@ -281,7 +281,7 @@ class BCrypt {
                 0x3f84d5b5,
                 -0x4ab8f6e9,
                 -0x6de92a27,
-                -0x768604e5
+                -0x768604e5,
             )
         private val S_orig =
             intArrayOf(
@@ -1308,7 +1308,7 @@ class BCrypt {
                 -0x48b19ece,
                 -0x31881da5,
                 0x578fdfe3,
-                0x3ac372e6
+                0x3ac372e6,
             )
 
         // bcrypt IV: "OrpheanBeholderScryDoubt"
@@ -1381,7 +1381,7 @@ class BCrypt {
                 '6',
                 '7',
                 '8',
-                '9'
+                '9',
             )
 
         // Table for Base64 decoding
@@ -1514,7 +1514,7 @@ class BCrypt {
                 -1,
                 -1,
                 -1,
-                -1
+                -1,
             )
         const val MIN_LOG_ROUNDS = 4
         const val MAX_LOG_ROUNDS = 31
@@ -1567,7 +1567,9 @@ class BCrypt {
         private fun char64(x: Char): Byte {
             return if (x.code < 0 || x.code >= index_64.size) {
                 -1
-            } else index_64[x.code]
+            } else {
+                index_64[x.code]
+            }
         }
 
         /**
@@ -1583,7 +1585,7 @@ class BCrypt {
         fun decodeBase64(s: String, maxLen: Int): ByteArray {
             val rs = StringBuilder()
             var off = 0
-            val slen = s.length
+            val sLen = s.length
             var olen = 0
             var c1: Byte
             var c2: Byte
@@ -1591,7 +1593,7 @@ class BCrypt {
             var c4: Byte
             var o: Byte
             require(maxLen > 0) { "Invalid maxolen" }
-            while (off < slen - 1 && olen < maxLen) {
+            while (off < sLen - 1 && olen < maxLen) {
                 c1 = char64(s[off++])
                 c2 = char64(s[off++])
                 if (c1.toInt() == -1 || c2.toInt() == -1) {
@@ -1600,7 +1602,7 @@ class BCrypt {
                 o = (c1.toInt() shl 2).toByte()
                 o = (o.toInt() or ((c2 and 0x30).toInt() shr 4)).toByte()
                 rs.append(Char(o.toUShort()))
-                if (++olen >= maxLen || off >= slen) {
+                if (++olen >= maxLen || off >= sLen) {
                     break
                 }
                 c3 = char64(s[off++])
@@ -1610,7 +1612,7 @@ class BCrypt {
                 o = ((c2 and 0x0f).toInt() shl 4).toByte()
                 o = (o.toInt() or ((c3 and 0x3c).toInt() shr 2)).toByte()
                 rs.append(Char(o.toUShort()))
-                if (++olen >= maxLen || off >= slen) {
+                if (++olen >= maxLen || off >= sLen) {
                     break
                 }
                 c4 = char64(s[off++])
@@ -1629,12 +1631,12 @@ class BCrypt {
         }
 
         /**
-         * Cycically extract a word of key material
+         * Cynically extract a word of key material
          *
          * @param data the string to extract the data from
          * @param offp a "pointer" (as a one-entry array) to the current offset into data
          * @param signp a "pointer" (as a one-entry array) to the cumulative flag for non-benign
-         * sign extension
+         *   sign extension
          * @return correct and buggy next word of material from data as int[2]
          */
         private fun streamtowords(data: ByteArray, offp: IntArray, signp: IntArray): IntArray {
@@ -1722,7 +1724,9 @@ class BCrypt {
                 require(
                     !(minor != 'a' && minor != 'x' && minor != 'y' && minor != 'b' ||
                         salt[3] != '$')
-                ) { "Invalid salt revision" }
+                ) {
+                    "Invalid salt revision"
+                }
                 off = 4
             }
 
@@ -1759,7 +1763,7 @@ class BCrypt {
         fun genSalt(
             prefix: String = "$2a",
             logRounds: Int = GENSALT_DEFAULT_LOG2_ROUNDS,
-            random: SecureRandom = SecureRandom()
+            random: SecureRandom = SecureRandom(),
         ): String {
             val rnd = ByteArray(BCRYPT_SALT_LEN)
             random.nextBytes(rnd)
@@ -1778,7 +1782,9 @@ class BCrypt {
             require(
                 !(!prefix.startsWith("$2") ||
                     prefix[2] != 'a' && prefix[2] != 'y' && prefix[2] != 'b')
-            ) { "Invalid prefix" }
+            ) {
+                "Invalid prefix"
+            }
             require(!(logRounds < 4 || logRounds > 31)) { "Invalid logRounds" }
             rs.append("$2")
             rs.append(prefix[2])

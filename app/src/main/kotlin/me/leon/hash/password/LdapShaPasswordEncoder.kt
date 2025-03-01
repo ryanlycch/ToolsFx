@@ -52,15 +52,15 @@ constructor(private val saltGenerator: BytesKeyGenerator = secureRandom()) : Pas
      * Calculates the hash of password (and salt bytes, if supplied) and returns a base64 encoded
      * concatenation of the hash and salt, prefixed with {SHA} (or {SSHA} if salt was used).
      *
-     * @param rawPass the password to be encoded.
+     * @param password the password to be encoded.
      * @return the encoded password in the specified format
      */
-    override fun encode(rawPass: CharSequence): String {
-        return encode(rawPass, saltGenerator.generateKey())
+    override fun encode(password: CharSequence): String {
+        return encode(password, saltGenerator.generateKey())
     }
 
-    fun encode(rawPassword: CharSequence, salt: ByteArray?): String {
-        val sha = getSha(rawPassword)
+    fun encode(password: CharSequence, salt: ByteArray?): String {
+        val sha = getSha(password)
         if (salt != null && salt.isNotEmpty()) {
             sha.update(salt)
         }
@@ -69,11 +69,11 @@ constructor(private val saltGenerator: BytesKeyGenerator = secureRandom()) : Pas
         return prefix + hash.base64()
     }
 
-    private fun getSha(rawPassword: CharSequence): MessageDigest {
+    private fun getSha(password: CharSequence): MessageDigest {
         return try {
-            MessageDigest.getInstance("SHA").apply { update(rawPassword.toString().toByteArray()) }
+            MessageDigest.getInstance("SHA").apply { update(password.toString().toByteArray()) }
         } catch (ignored: NoSuchAlgorithmException) {
-            throw IllegalStateException("No SHA implementation available!")
+            error("No SHA implementation available!")
         }
     }
 
@@ -97,19 +97,19 @@ constructor(private val saltGenerator: BytesKeyGenerator = secureRandom()) : Pas
      * Checks the validity of an unencoded password against an encoded one in the form
      * "{SSHA}sQuQF8vj8Eg2Y1hPdh3bkQhCKQBgjhQI".
      *
-     * @param rawPassword unencoded password to be verified.
+     * @param password unencoded password to be verified.
      * @param encodedPassword the actual SSHA or SHA encoded password
      * @return true if they match (independent of the case of the prefix).
      */
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
-        return matches(rawPassword.toString(), encodedPassword)
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
+        return matches(password.toString(), encodedPassword)
     }
 
-    private fun matches(rawPassword: String, encodedPassword: String): Boolean {
-        val prefix = extractPrefix(encodedPassword) ?: return encodedPassword == rawPassword
+    private fun matches(password: String, encodedPassword: String): Boolean {
+        val prefix = extractPrefix(encodedPassword) ?: return encodedPassword == password
         val salt = getSalt(encodedPassword, prefix)
         val startOfHash = prefix.length
-        val encodedRawPass = encode(rawPassword, salt).substring(startOfHash)
+        val encodedRawPass = encode(password, salt).substring(startOfHash)
         return encodedRawPass == encodedPassword.substring(startOfHash)
     }
 
@@ -139,7 +139,6 @@ constructor(private val saltGenerator: BytesKeyGenerator = secureRandom()) : Pas
     }
 
     companion object {
-        /** The number of bytes in SHA hash */
         private const val SHA_LENGTH = 20
         private const val SSHA_PREFIX = "{SSHA}"
         private val SSHA_PREFIX_LC = SSHA_PREFIX.lowercase()

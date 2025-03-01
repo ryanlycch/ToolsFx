@@ -17,7 +17,7 @@ val String.curve: ECCurve
 
 fun String.curveMultiply(x: BigInteger, y: BigInteger, k: BigInteger): Pair<String, String> {
     with(curve.createPoint(x, y).multiply(k).getEncoded(false).toHex()) {
-        return Pair(substring(2, 66), substring(66))
+        return substring(2, 66) to substring(66)
     }
 }
 
@@ -25,11 +25,11 @@ fun String.curveAdd(
     x: BigInteger,
     y: BigInteger,
     x2: BigInteger,
-    y2: BigInteger
+    y2: BigInteger,
 ): Pair<String, String> {
     with(curve) {
         val hex = createPoint(x, y).add(createPoint(x2, y2)).getEncoded(false).toHex()
-        return Pair(hex.substring(2, 66), hex.substring(66))
+        return hex.substring(2, 66) to hex.substring(66)
     }
 }
 
@@ -37,10 +37,10 @@ fun String.curveSubtract(
     x: BigInteger,
     y: BigInteger,
     x2: BigInteger,
-    y2: BigInteger
+    y2: BigInteger,
 ): Pair<String, String> {
     with(curve) {
         val hex = createPoint(x, y).subtract(createPoint(x2, y2)).getEncoded(false).toHex()
-        return Pair(hex.substring(2, 66), hex.substring(66))
+        return hex.substring(2, 66) to hex.substring(66)
     }
 }

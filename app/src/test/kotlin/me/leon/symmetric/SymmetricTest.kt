@@ -21,31 +21,31 @@ class SymmetricTest {
         val plain = "Hello World!你好".toByteArray()
         val key = "1234567890123456".toByteArray()
         val iv = "1234567890123456".toByteArray()
-        plain.encrypt(key, iv, "Shacal2").let {
+        plain.encrypt(key, iv, "Shacal2").also {
             println(it.base64())
-            it.decrypt(key, iv, "Shacal2").let { assertTrue { plain.contentEquals(it) } }
+            it.decrypt(key, iv, "Shacal2").also { assertTrue { plain.contentEquals(it) } }
         }
-        plain.encrypt(key, iv, "VMPC-KSA3").let {
+        plain.encrypt(key, iv, "VMPC-KSA3").also {
             println(it.base64())
-            it.decrypt(key, iv, "VMPC-KSA3").let { assertTrue { plain.contentEquals(it) } }
+            it.decrypt(key, iv, "VMPC-KSA3").also { assertTrue { plain.contentEquals(it) } }
         }
-        plain.encrypt(key, iv, "ARC4").let {
+        plain.encrypt(key, iv, "ARC4").also {
             println(it.base64())
-            it.decrypt(key, iv, "ARC4").let { assertTrue { plain.contentEquals(it) } }
+            it.decrypt(key, iv, "ARC4").also { assertTrue { plain.contentEquals(it) } }
         }
-        plain.encrypt(key + key, iv, "GOST28147").let {
+        plain.encrypt(key + key, iv, "GOST28147").also {
             println(it.base64())
-            it.decrypt(key + key, iv, "GOST28147").let { assertTrue { plain.contentEquals(it) } }
+            it.decrypt(key + key, iv, "GOST28147").also { assertTrue { plain.contentEquals(it) } }
         }
-        plain.encrypt(key + key, iv, "GOST3412-2015").let {
+        plain.encrypt(key + key, iv, "GOST3412-2015").also {
             println(it.base64())
-            it.decrypt(key + key, iv, "GOST3412-2015").let {
+            it.decrypt(key + key, iv, "GOST3412-2015").also {
                 assertTrue { plain.contentEquals(it) }
             }
         }
-        plain.encrypt(key, iv, "Noekeon").let {
+        plain.encrypt(key, iv, "Noekeon").also {
             println(it.base64())
-            it.decrypt(key, iv, "Noekeon").let { assertTrue { plain.contentEquals(it) } }
+            it.decrypt(key, iv, "Noekeon").also { assertTrue { plain.contentEquals(it) } }
         }
     }
 
@@ -62,7 +62,7 @@ class SymmetricTest {
         data.encrypt(key, iv, alg, ad).let {
             assertEquals(
                 "1509a68ab16bba4831cf1b24eae69e90113b05f619d8107da9dcd58c3ee9d1bc906cdf1efc7844962ba0f5e436d2",
-                it.toHex()
+                it.toHex(),
             )
             data = it
         }
@@ -74,7 +74,7 @@ class SymmetricTest {
         raw.toByteArray().encrypt(key, iv, alg, ad).let {
             assertEquals(
                 "cec189d0e85c89f4a0518f06b9834af95cfb2bfe89d0920c9386ebba5e4fc3d13a7bb5093004bc6470ba06fca0e6",
-                it.toHex()
+                it.toHex(),
             )
             data = it
         }
@@ -85,7 +85,7 @@ class SymmetricTest {
         raw.toByteArray().encrypt(key, iv, alg, ad).let {
             assertEquals(
                 "da1b29c03b1cd9c64296fef198928d25885ae9790b262635b3d3aa4d6fe8fe42aa74c6b13d53",
-                it.toHex()
+                it.toHex(),
             )
             data = it
         }
@@ -97,7 +97,7 @@ class SymmetricTest {
         raw.toByteArray().encrypt(key, iv, alg, ad).let {
             assertEquals(
                 "2e369d2d7fa37c905e7e6b9f232a8573cb6b6df1f981fcff924a12b75a71d38fb8d30d54a118",
-                it.toHex()
+                it.toHex(),
             )
             data = it
         }

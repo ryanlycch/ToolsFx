@@ -28,7 +28,6 @@ import me.leon.hash.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm
 
 /**
  * A [PasswordEncoder] implementation that uses PBKDF2 with :
- *
  * * a configurable random salt value length (default is {@value #DEFAULT_SALT_LENGTH} bytes)
  * * a configurable number of iterations (default is {@value #DEFAULT_ITERATIONS})
  * * a configurable output hash width (default is {@value #DEFAULT_HASH_WIDTH} bits)
@@ -48,7 +47,7 @@ constructor(
     private val secret: String = "",
     saltLength: Int = DEFAULT_SALT_LENGTH,
     private var iterations: Int = DEFAULT_ITERATIONS,
-    private var hashWidth: Int = DEFAULT_HASH_WIDTH
+    private var hashWidth: Int = DEFAULT_HASH_WIDTH,
 ) : PasswordEncoder {
     private val saltGenerator: BytesKeyGenerator
     private var algorithm = SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1.name
@@ -68,9 +67,9 @@ constructor(
         }
     }
 
-    override fun encode(rawPassword: CharSequence): String {
+    override fun encode(password: CharSequence): String {
         val salt = saltGenerator.generateKey()
-        val encoded = encode(rawPassword, salt)
+        val encoded = encode(password, salt)
         return encode(encoded)
     }
 
@@ -82,19 +81,21 @@ constructor(
     private fun encode(bytes: ByteArray): String {
         return if (encodeHashAsBase64) {
             bytes.base64()
-        } else bytes.toHex()
+        } else {
+            bytes.toHex()
+        }
     }
 
-    override fun matches(rawPassword: CharSequence, encodedPassword: String): Boolean {
+    override fun matches(password: CharSequence, encodedPassword: String): Boolean {
         val digested = decode(encodedPassword)
         val salt = digested.sliceArray(0 until saltGenerator.keyLength)
-        return MessageDigest.isEqual(digested, encode(rawPassword, salt))
+        return MessageDigest.isEqual(digested, encode(password, salt))
     }
 
     fun matchesWithSalt(
         rawPassword: CharSequence,
         encodedPassword: String,
-        salt: ByteArray
+        salt: ByteArray,
     ): Boolean {
         val digested = decode(encodedPassword)
         return MessageDigest.isEqual(digested, encode(rawPassword, salt))
@@ -103,7 +104,9 @@ constructor(
     private fun decode(encodedBytes: String): ByteArray {
         return if (encodeHashAsBase64) {
             Base64.getDecoder().decode(encodedBytes)
-        } else encodedBytes.hex2ByteArray()
+        } else {
+            encodedBytes.hex2ByteArray()
+        }
     }
 
     fun encode(rawPassword: CharSequence, salt: ByteArray): ByteArray {
@@ -113,7 +116,7 @@ constructor(
                     rawPassword.toString().toCharArray(),
                     salt + secret.toByteArray(),
                     iterations,
-                    hashWidth
+                    hashWidth,
                 )
             salt + SecretKeyFactory.getInstance(algorithm).generateSecret(spec).encoded
         } catch (ex: GeneralSecurityException) {
@@ -143,18 +146,18 @@ constructor(
     companion object {
         private const val DEFAULT_SALT_LENGTH = 8
         private const val DEFAULT_HASH_WIDTH = 256
-        private const val DEFAULT_ITERATIONS = 185000
+        private const val DEFAULT_ITERATIONS = 185_000
     }
 }
 
 val PBE_ENCODERS =
     Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.values().fold(
-            mutableMapOf<SecretKeyFactoryAlgorithm, Pbkdf2PasswordEncoder>()
-        ) { acc, secretKeyFactoryAlgorithm ->
+        mutableMapOf<SecretKeyFactoryAlgorithm, Pbkdf2PasswordEncoder>()
+    ) { acc, secretKeyFactoryAlgorithm ->
         acc.apply {
             put(
                 secretKeyFactoryAlgorithm,
-                Pbkdf2PasswordEncoder().apply { setAlgorithm(secretKeyFactoryAlgorithm) }
+                Pbkdf2PasswordEncoder().apply { setAlgorithm(secretKeyFactoryAlgorithm) },
             )
         }
     }

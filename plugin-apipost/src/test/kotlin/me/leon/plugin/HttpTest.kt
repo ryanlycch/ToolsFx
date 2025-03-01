@@ -2,10 +2,15 @@ package me.leon.plugin
 
 import java.io.File
 import java.util.Base64
+import kotlin.test.Test
+import me.leon.Api
+import me.leon.ext.*
 import me.leon.toolsfx.plugin.net.*
-import org.junit.Test
 
 class HttpTest {
+
+    private val httpConfigPath = File(File("").absoluteFile.parentFile, "/testdata/https")
+
     @Test
     fun getTest() {
         HttpUrlUtil.get(
@@ -32,7 +37,7 @@ class HttpTest {
         HttpUrlUtil.post(
             "https://lab.magiconch.com/api/nbnhhsh/guess",
             mutableMapOf("text" to "cylx"),
-            isJson = true
+            isJson = true,
         )
     }
 
@@ -119,7 +124,7 @@ class HttpTest {
             mutableMapOf(
                 "apiType" to "bilibili,muke",
                 "token" to "5c483f653d928ef0c83d3547efb12792",
-            )
+            ),
         )
     }
 
@@ -131,8 +136,32 @@ class HttpTest {
             listOf(
                 File("E:\\prj\\Android-app\\app\\src\\main\\res\\drawable\\icon_photograph.png")
             ),
-            "image"
+            "image",
         )
+    }
+
+    @Test
+    fun parse() {
+        val apis = readRes<HttpTest>("/apis.json").fromJsonArray(Api::class.java)
+        println(apis)
+        for (api in apis.take(1)) {
+            println(api)
+            val r =
+                HttpUrlUtil.postFile(
+                        api.api,
+                        listOf(
+                            File(
+                                "E:\\prj\\Android-app\\app\\src\\main\\res\\drawable\\icon_photograph.png"
+                            )
+                        ),
+                        api.file,
+                        api.body.toMutableMap(),
+                        api.headers.toMutableMap(),
+                    )
+                    .data
+
+            println(r.simpleJsonPath(api.result))
+        }
     }
 
     @Test
@@ -151,16 +180,18 @@ class HttpTest {
             sec-fetch-site: same-site
             user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)
              Chrome/86.0.4240.198 Safari/537.36
-        """.trimIndent()
+        """
+                .trimIndent()
+        println(headers)
         val header2 = "Max-Forwards:44\n" + "aa:bb"
         println(NetHelper.parseHeaderString(headers))
         println(NetHelper.parseHeaderString(header2))
     }
 
-    private val httpConfigPath = File(File("").absoluteFile.parentFile, "/testdata/https")
-
     @Test
     fun cert() {
+
+        HttpUrlUtil.verifySSL(true)
         TrustManager.parseFromCertification("$httpConfigPath/baidu.cer")
         HttpUrlUtil.get("https://www.baidu.com")
         // error cer
@@ -177,7 +208,7 @@ class HttpTest {
             "https://193.110.201.185:11000/find_cached_nodes",
             "{\"network\":\"pnet\",\"target_id\":\"dzlOMk52c2RCU1Q4NmZHZnlTT2ZzSkUxY0tPWFlqV3dzdzVtc1k4REtwWTZiR" +
                 "kxYcmo5dW4yNmQ0RWtsRVpKcQ==\",\"local_continent_code\":\"AS\",\"local_country_code\":\"CN\",\"tar" +
-                "get_country_code\":\"KR\",\"num_nodes\":20}"
+                "get_country_code\":\"KR\",\"num_nodes\":20}",
         )
         TrustManager.parseFromPkcs12("$httpConfigPath/baidu.p12", "123456")
         HttpUrlUtil.get("https://www.baidu.com")

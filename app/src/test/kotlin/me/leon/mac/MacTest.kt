@@ -5,6 +5,10 @@ import kotlin.test.assertEquals
 import me.leon.ext.crypto.mac
 import me.leon.ext.crypto.macWithIv
 import me.leon.ext.toHex
+import org.bouncycastle.crypto.engines.ChaCha7539Engine
+import org.bouncycastle.crypto.macs.Poly1305
+import org.bouncycastle.crypto.params.KeyParameter
+import org.bouncycastle.crypto.params.ParametersWithIV
 import org.junit.Test
 
 class MacTest {
@@ -35,8 +39,7 @@ class MacTest {
                 "HmacKeccak224" to "d50b18b8a15d6d147c3f21564d8711d023ba8f5d000452c4b61afc34",
                 "HmacDSTU7564-256" to
                     "5bbdd461892e5bf9e9c734f10a391df48f4336032a5e3686a89b2e43244f38ff",
-                "HmacGOST3411" to
-                    "374c2efa55f0d06fb355d93039f55949a9d0c7f50b35cb71d9e79b2d4aa5f3d1",
+                "HmacGOST3411" to "374c2efa55f0d06fb355d93039f55949a9d0c7f50b35cb71d9e79b2d4aa5f3d1",
             )
         for ((name, expected) in expectedMap) assertEquals(expected, data.mac(key, name).toHex())
     }
@@ -62,7 +65,7 @@ class MacTest {
 
         for ((name, expected) in expectedMap) assertEquals(
             expected,
-            data.macWithIv(key, iv, name).toHex()
+            data.macWithIv(key, iv, name).toHex(),
         )
     }
 
@@ -87,7 +90,7 @@ class MacTest {
 
         for ((name, expected) in expectedMap) assertEquals(
             expected,
-            data.macWithIv(key, iv, name).toHex()
+            data.macWithIv(key, iv, name).toHex(),
         )
     }
 
@@ -103,8 +106,7 @@ class MacTest {
                 "DESEDECMAC" to "ee0b9cd33cb6d298",
                 "BLOWFISHCMAC" to "339e0dc83afcd195",
                 "SEED-CMAC" to "0f385da442586a0f1faf832533a8685a",
-                "Shacal-2CMAC" to
-                    "1db2fede16d06e4761c8b975d471eb8a8ed5024a12e98799caf9b78ac0e1038a",
+                "Shacal-2CMAC" to "1db2fede16d06e4761c8b975d471eb8a8ed5024a12e98799caf9b78ac0e1038a",
             )
 
         for ((name, expected) in expectedMap) assertEquals(expected, data.mac(key, name).toHex())
@@ -117,5 +119,30 @@ class MacTest {
         key = "12341234123412341234123412341234".toByteArray()
         iv = "1234123412341234123412341".toByteArray()
         data.macWithIv(key, iv, "ZUC-256-32").toHex().also { println(it) }
+    }
+
+    @Test
+    fun mac() {
+        // 输入需要加密的数据和密钥
+        val data = "Hello World!".toByteArray()
+        val key = "ThisIsAKey123456ThisIsAKey123456".toByteArray()
+        // 初始化ChaCha20加密引擎
+        val chacha20 = ChaCha7539Engine()
+        val parametersWithIV = ParametersWithIV(KeyParameter(key), ByteArray(12))
+        chacha20.init(true, parametersWithIV)
+        // 加密数据
+        val encryptedData = ByteArray(data.size)
+        chacha20.processBytes(data, 0, data.size, encryptedData, 0)
+
+        // 初始化Poly1305消息认证码算法
+        val poly1305 = Poly1305()
+        poly1305.init(KeyParameter(key))
+        // 计算消息认证码
+        val mac = ByteArray(poly1305.macSize)
+        poly1305.update(encryptedData, 0, encryptedData.size)
+        poly1305.doFinal(mac, 0)
+        // 输出加密后的数据和消息认证码
+        println("Encrypted data: ${String(encryptedData)}")
+        println("MAC: ${String(mac)}")
     }
 }
